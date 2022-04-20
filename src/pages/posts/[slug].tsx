@@ -4,7 +4,7 @@ import Head from "next/head";
 import { RichText } from "prismic-dom";
 import { getPrismicClient } from "../../services/prismic";
 
-import styles  from './post.module.scss'
+import styles from "./post.module.scss";
 
 interface PostProps {
   post: {
@@ -17,22 +17,23 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
   return (
-      <>
+    <>
       <Head>
-          <title>{post.title}|IgNews</title>
+        <title>{post.title}|IgNews</title>
       </Head>
 
-      <main className= {styles.container}>
-          <article className= {styles.post}>
-              <h1>{post.title}</h1>
-              <time>{post.updatedAt}</time>
-              <div 
-              className= {styles.postContent}
-              dangerouslySetInnerHTML= {{__html: post.content}}/>
-          </article>
+      <main className={styles.container}>
+        <article className={styles.post}>
+          <h1>{post.title}</h1>
+          <time>{post.updatedAt}</time>
+          <div
+            className={styles.postContent}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </article>
       </main>
-      </>
-  )
+    </>
+  );
 }
 
 export const getServerSideProps: GetServerSideProps = async ({
@@ -41,15 +42,21 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   const session = await getSession({ req });
   const { slug } = params;
+  console.log(session);
 
-  // if( !session) {
-
-  //  }
+  if (!session.activeSubscription) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
   const prismic = getPrismicClient(req);
 
   const response = await prismic.getByUID<any>("publication", String(slug), {}); // por conta da versão do Prismic ter atualizado,
-                                                                                 // fazendo com que a propriedade getByUID precisasse de um generic com alguns dados da resposta.
+  // fazendo com que a propriedade getByUID precisasse de um generic com alguns dados da resposta.
 
   const post = {
     slug,
